@@ -2,6 +2,24 @@
  "cells": [
   {
    "cell_type": "code",
+   "execution_count": 2,
+   "id": "cabca43c",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Note: you may need to restart the kernel to use updated packages.\n"
+     ]
+    }
+   ],
+   "source": [
+    "pip list > requirement.txt"
+   ]
+  },
+  {
+   "cell_type": "code",
    "execution_count": 1,
    "id": "df783f23",
    "metadata": {},
@@ -647,7 +665,7 @@
    ],
    "source": [
     "if __name__ == '__main__':\n",
-    "        app.run_server()"
+    "    app.run_server(debug=True)"
    ]
   }
  ],
