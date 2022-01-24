@@ -1,693 +1,473 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": 2,
-   "id": "cabca43c",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Note: you may need to restart the kernel to use updated packages.\n"
+import dash
+import pandas as pd
+import dash_bootstrap_components as dbc
+import dash_core_components as dcc
+import dash_html_components as html
+from dash.dependencies import Input, Output, State
+import numpy as np
+
+import plotly.express as px
+
+
+BA=pd.read_excel("exported data from Ahafo Region.xlsx")
+AS=pd.read_excel("exported data from Ashanti Region.xlsx")
+ES=pd.read_excel("Exported data from Eastern Region.xlsx")
+GR=pd.read_excel("exported data from Greater Accra Region.xlsx")
+ba = BA.iloc[:,0:12]
+gr = GR.iloc[:,0:12]
+ash = AS.iloc[:,0:12]
+es = ES.iloc[:,0:12]
+df = ba.append(ba).append(gr).append(ash).append(es)
+
+nregions =df.Regions.unique()
+
+#Choose a theme and define the layout
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = app.server
+
+
+# the style arguments for the sidebar.
+SIDEBAR_STYLE = {
+     'position': 'fixed',
+     'top': 0,
+     'left': 0,
+     'bottom': 0,
+     'width': '20%',
+     'padding': '20px 10px',
+     'background-color': '#ffd697',
+     
+ }
+
+# the style arguments for the main content page.
+CONTENT_STYLE = {
+     'margin-left': '25%',
+     'margin-right': '5%',
+     'padding': '20px 10p'
+ }
+
+TEXT_STYLE = {
+     'textAlign': 'center',
+     'color': '#191970'
+ }
+
+CARD_TEXT_STYLE = {
+     'textAlign': 'center',
+     'color': '#0074D9'
+ }
+#######Drop downs
+controls = dbc.FormGroup(
+     [
+         html.Br(),
+         html.P('Region', style={
+             'textAlign': 'center'
+         }),
+         dcc.Dropdown(
+             id='region-dropdown',
+             
+             options=[{"label": nr, "value": nr} for nr in np.sort(nregions)]
+             ,
+# default value
+             multi=False
+        
+         ),
+         html.Br(),
+         html.P('District', style={
+             'textAlign': 'center'
+         }),
+         dcc.Dropdown(
+             id='district-dropdown',
+             options=[]
+             ,
+# default value
+             multi=False
+         ),
+         html.Br(),
+         html.P('Indicators', style={
+             'textAlign': 'center'
+         }),
+         dcc.Dropdown(
+             id='indicators-dropdown',
+             
+             options=[
+                 {"label": 'Age', "value": 'Age'},
+                 {"label": 'Sex', "value": 'Sex'},
+                 {"label": 'Education', "value": 'Education'}
+                     ]
+             ,
+# default value
+             multi=False
+         ),
      ]
-    }
-   ],
-   "source": [
-    "pip list > requirement.txt"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 1,
-   "id": "df783f23",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "#Import dependent libraries\n",
-    "import dash\n",
-    "import pandas as pd\n",
-    "import dash_bootstrap_components as dbc\n",
-    "import dash_core_components as dcc\n",
-    "import dash_html_components as html\n",
-    "from dash.dependencies import Input, Output, State\n",
-    "import numpy as np\n",
-    "\n",
-    "import plotly.express as px"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 2,
-   "id": "4992b54f",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "BA=pd.read_excel(\"exported data from Ahafo Region.xlsx\")\n",
-    "AS=pd.read_excel(\"exported data from Ashanti Region.xlsx\")\n",
-    "ES=pd.read_excel(\"Exported data from Eastern Region.xlsx\")\n",
-    "GR=pd.read_excel(\"exported data from Greater Accra Region.xlsx\")\n",
-    "ba = BA.iloc[:,0:12]\n",
-    "gr = GR.iloc[:,0:12]\n",
-    "ash = AS.iloc[:,0:12]\n",
-    "es = ES.iloc[:,0:12]\n",
-    "df = ba.append(ba).append(gr).append(ash).append(es)\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 3,
-   "id": "55d7b7a4",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "nregions =df.Regions.unique()"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 5,
-   "id": "5fcfb234",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "#Choose a theme and define the layout\n",
-    "app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])\n",
-    "server = app.server"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 6,
-   "id": "5df6e775",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "#the style arguments for the sidebar.\n",
-    "SIDEBAR_STYLE = {\n",
-    "     'position': 'fixed',\n",
-    "     'top': 0,\n",
-    "     'left': 0,\n",
-    "     'bottom': 0,\n",
-    "     'width': '20%',\n",
-    "     'padding': '20px 10px',\n",
-    "     'background-color': '#ffd697',\n",
-    "     \n",
-    " }\n",
-    "\n",
-    "# the style arguments for the main content page.\n",
-    "CONTENT_STYLE = {\n",
-    "     'margin-left': '25%',\n",
-    "     'margin-right': '5%',\n",
-    "     'padding': '20px 10p'\n",
-    " }\n",
-    "\n",
-    "TEXT_STYLE = {\n",
-    "     'textAlign': 'center',\n",
-    "     'color': '#191970'\n",
-    " }\n",
-    "\n",
-    "CARD_TEXT_STYLE = {\n",
-    "     'textAlign': 'center',\n",
-    "     'color': '#0074D9'\n",
-    " }\n",
-    "#######Drop downs\n",
-    "controls = dbc.FormGroup(\n",
-    "     [\n",
-    "         html.Br(),\n",
-    "         html.P('Region', style={\n",
-    "             'textAlign': 'center'\n",
-    "         }),\n",
-    "         dcc.Dropdown(\n",
-    "             id='region-dropdown',\n",
-    "             \n",
-    "             options=[{\"label\": nr, \"value\": nr} for nr in np.sort(nregions)]\n",
-    "             ,\n",
-    "# default value\n",
-    "             multi=False\n",
-    "        \n",
-    "         ),\n",
-    "         html.Br(),\n",
-    "         html.P('District', style={\n",
-    "             'textAlign': 'center'\n",
-    "         }),\n",
-    "         dcc.Dropdown(\n",
-    "             id='district-dropdown',\n",
-    "             options=[]\n",
-    "             ,\n",
-    "# default value\n",
-    "             multi=False\n",
-    "         ),\n",
-    "         html.Br(),\n",
-    "         html.P('Indicators', style={\n",
-    "             'textAlign': 'center'\n",
-    "         }),\n",
-    "         dcc.Dropdown(\n",
-    "             id='indicators-dropdown',\n",
-    "             \n",
-    "             options=[\n",
-    "                 {\"label\": 'Age', \"value\": 'Age'},\n",
-    "                 {\"label\": 'Sex', \"value\": 'Sex'},\n",
-    "                 {\"label\": 'Education', \"value\": 'Education'}\n",
-    "                     ]\n",
-    "             ,\n",
-    "# default value\n",
-    "             multi=False\n",
-    "         ),\n",
-    "     ]\n",
-    " )\n",
-    "\n",
-    "sidebar = html.Div(\n",
-    "     [\n",
-    "         html.H2('Parameters', style=TEXT_STYLE),\n",
-    "         html.Hr(),\n",
-    "         controls\n",
-    "     ],\n",
-    "style=SIDEBAR_STYLE,\n",
-    " )\n"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 7,
-   "id": "b62646a7",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "# #Graph Items\n",
-    "content_third_row = dbc.Row(\n",
-    "     [\n",
-    "         html.Br(),\n",
-    "         html.P('What type of economic activity are you engaged in?', style={\n",
-    "             'textAlign': 'center'\n",
-    "         }),\n",
-    "         html.Br(),\n",
-    "  \n",
-    "        html.Div(\n",
-    "            children=dcc.Graph(\n",
-    "                id=\"type-chart\"\n",
-    "            ),\n",
-    "            className=\"card\",\n",
-    "            \n",
-    "        ),\n",
-    "     ]\n",
-    " )\n",
-    "\n",
-    "content_indicator_row = dbc.Row(\n",
-    "       [\n",
-    "          html.Br(),\n",
-    "         html.P('Are you engaged in any economic activity?', style={\n",
-    "             'textAlign': 'center'\n",
-    "         }),\n",
-    "           html.Br(),\n",
-    "           \n",
-    "        html.Div(\n",
-    "            children=dcc.Graph(\n",
-    "                id=\"eco-chart\"\n",
-    "            ),\n",
-    "            className=\"card\",\n",
-    "            \n",
-    "        ),\n",
-    " \n",
-    "     ]\n",
-    " )\n",
-    "\n",
-    "content_secu_row = dbc.Row(\n",
-    "       [\n",
-    "          html.Br(),\n",
-    "         html.P('Would you describe the current security situation in the country as secured?', style={\n",
-    "             'textAlign': 'center'\n",
-    "         }),\n",
-    "           html.Br(),\n",
-    "        html.Div(\n",
-    "            children=dcc.Graph(\n",
-    "                id=\"secu-chart\"\n",
-    "            ),\n",
-    "            className=\"card\",\n",
-    "            \n",
-    "        ),\n",
-    "\n",
-    "     ]\n",
-    " )\n",
-    "\n",
-    "content_con_row = dbc.Row(\n",
-    "       [\n",
-    "            html.Br(),\n",
-    "         html.P('Do you have confidence in the ability of security agencies to contain the security situation?',\n",
-    "                style={\n",
-    "             'textAlign': 'center'\n",
-    "         }),\n",
-    "    \n",
-    "        html.Div(\n",
-    "            children=dcc.Graph(\n",
-    "                id=\"con-chart\"\n",
-    "            ),\n",
-    "            className=\"card\",\n",
-    "            \n",
-    "        ),\n",
-    "      \n",
-    "     ]\n",
-    " )\n",
-    "\n",
-    "content_safe_row = dbc.Row(\n",
-    "       [\n",
-    "        html.Br(),\n",
-    "         html.P('Do you feel safe in the country?',\n",
-    "                style={\n",
-    "             'textAlign': 'center'\n",
-    "         }),\n",
-    "           html.Br(),\n",
-    "        html.Div(\n",
-    "            children=dcc.Graph(\n",
-    "                id=\"safe-chart\"\n",
-    "            ),\n",
-    "            className=\"card\",\n",
-    "            \n",
-    "        ),\n",
-    "     \n",
-    "     ]\n",
-    " )\n",
-    "\n",
-    "\n",
-    "content = html.Div(\n",
-    "     [\n",
-    "\n",
-    "         content_indicator_row,\n",
-    "         content_third_row,\n",
-    "         content_secu_row,\n",
-    "         content_con_row,\n",
-    "         content_safe_row\n",
-    "     ],\n",
-    "     style=CONTENT_STYLE\n",
-    " )"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 8,
-   "id": "d0871c8e",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "app.layout = html.Div([sidebar, content])"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 9,
-   "id": "9ebec7d4",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "@app.callback(\n",
-    "    Output(\"district-dropdown\", \"options\"),\n",
-    "    Input(\"region-dropdown\", \"value\")\n",
-    ")\n",
-    "def update_districts(region):\n",
-    "    district= (df[df['Regions'] == str(region)]['District']).unique()\n",
-    "    options = [{\"label\": nr, \"value\": nr} for nr in np.sort(district)]\n",
-    "\n",
-    "    return options"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 10,
-   "id": "79b55f8f",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "@app.callback(\n",
-    "   Output(\"eco-chart\", \"figure\"),\n",
-    "    Output(\"type-chart\", \"figure\"),\n",
-    "    Output(\"secu-chart\", \"figure\"),\n",
-    "    Output(\"safe-chart\", \"figure\"),\n",
-    "    Output(\"con-chart\", \"figure\"),\n",
-    "    Input(\"region-dropdown\", \"value\"),\n",
-    "    Input(\"district-dropdown\", \"value\"),\n",
-    "    Input(\"indicators-dropdown\", \"value\"),\n",
-    ")\n",
-    "def submit_(region, district, indicators):   \n",
-    "    if district:\n",
-    "        if indicators == 'Age':\n",
-    "            \n",
-    "            x_bar = 'Age'\n",
-    "                \n",
-    "            c_bar = 'Are you engaged in any economic activity?'\n",
-    "            eco_result = df[df['District'] == str(district)].groupby(\n",
-    "                [x_bar, c_bar]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_econ = 'What type of economic activity are you engaged in?'\n",
-    "            eco_type = result = df[df['District'] == str(district)].groupby(\n",
-    "                [x_bar, c_bar_econ]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_secu = 'Would you describe the current security situation in the country as secured?'\n",
-    "            eco_secu = df[df['District'] == str(district)].groupby(\n",
-    "                [x_bar, c_bar_secu]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_safe = 'Do you feel safe in the country?'\n",
-    "            eco_safe = df[df['District'] == str(district)].groupby(\n",
-    "                [x_bar, c_bar_safe]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_con = 'Do you have confidence in the ability of security agencies to contain the security situation?'\n",
-    "            eco_con = df[df['District'] == str(district)].groupby(\n",
-    "                [x_bar, c_bar_con]\n",
-    "            ).count()\n",
-    "            \n",
-    "            \n",
-    "        elif indicators == 'Sex':\n",
-    "            \n",
-    "            x_bar = 'Sex'\n",
-    "                \n",
-    "            c_bar = 'Are you engaged in any economic activity?'\n",
-    "            eco_result = df[df['District'] == str(district)].groupby(\n",
-    "                [x_bar, c_bar]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_econ = 'What type of economic activity are you engaged in?'\n",
-    "            eco_type = result = df[df['District'] == str(district)].groupby(\n",
-    "                [x_bar, c_bar_econ]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_secu = 'Would you describe the current security situation in the country as secured?'\n",
-    "            eco_secu = df[df['District'] == str(district)].groupby(\n",
-    "                [x_bar, c_bar_secu]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_safe = 'Do you feel safe in the country?'\n",
-    "            eco_safe = df[df['District'] == str(district)].groupby(\n",
-    "                [x_bar, c_bar_safe]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_con = 'Do you have confidence in the ability of security agencies to contain the security situation?'\n",
-    "            eco_con = df[df['District'] == str(district)].groupby(\n",
-    "                [x_bar, c_bar_con]\n",
-    "            ).count()\n",
-    "            \n",
-    "            \n",
-    "            \n",
-    "        elif indicators == 'Education':\n",
-    "            \n",
-    "            x_bar = 'What is your level of education?'\n",
-    "                \n",
-    "            c_bar = 'Are you engaged in any economic activity?'\n",
-    "            eco_result = df[df['District'] == str(district)].groupby(\n",
-    "                [x_bar, c_bar]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_econ = 'What type of economic activity are you engaged in?'\n",
-    "            eco_type = result = df[df['District'] == str(district)].groupby(\n",
-    "                [x_bar, c_bar_econ]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_secu = 'Would you describe the current security situation in the country as secured?'\n",
-    "            eco_secu = df[df['District'] == str(district)].groupby(\n",
-    "                [x_bar, c_bar_secu]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_safe = 'Do you feel safe in the country?'\n",
-    "            eco_safe = df[df['District'] == str(district)].groupby(\n",
-    "                [x_bar, c_bar_safe]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_con = 'Do you have confidence in the ability of security agencies to contain the security situation?'\n",
-    "            eco_con = df[df['District'] == str(district)].groupby(\n",
-    "                [x_bar, c_bar_con]\n",
-    "            ).count()\n",
-    "            \n",
-    "            lab = district\n",
-    "        \n",
-    "    elif region:\n",
-    "        \n",
-    "        if indicators == 'Age':\n",
-    "            \n",
-    "            x_bar = 'Age'\n",
-    "                \n",
-    "            c_bar = 'Are you engaged in any economic activity?'\n",
-    "            eco_result = df[df['Regions'] == str(region)].groupby(\n",
-    "                [x_bar, c_bar]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_econ = 'What type of economic activity are you engaged in?'\n",
-    "            eco_type = result = df[df['Regions'] == str(region)].groupby(\n",
-    "                [x_bar, c_bar_econ]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_secu = 'Would you describe the current security situation in the country as secured?'\n",
-    "            eco_secu = df[df['Regions'] == str(region)].groupby(\n",
-    "                [x_bar, c_bar_secu]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_safe = 'Do you feel safe in the country?'\n",
-    "            eco_safe = df[df['Regions'] == str(region)].groupby(\n",
-    "                [x_bar, c_bar_safe]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_con = 'Do you have confidence in the ability of security agencies to contain the security situation?'\n",
-    "            eco_con = df[df['Regions'] == str(region)].groupby(\n",
-    "                [x_bar, c_bar_con]\n",
-    "            ).count()\n",
-    "            \n",
-    "            \n",
-    "        elif indicators == 'Sex':\n",
-    "            \n",
-    "            x_bar = 'Sex'\n",
-    "                \n",
-    "            c_bar = 'Are you engaged in any economic activity?'\n",
-    "            eco_result = df[df['Regions'] == str(region)].groupby(\n",
-    "                [x_bar, c_bar]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_econ = 'What type of economic activity are you engaged in?'\n",
-    "            eco_type = result = df[df['Regions'] == str(region)].groupby(\n",
-    "                [x_bar, c_bar_econ]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_secu = 'Would you describe the current security situation in the country as secured?'\n",
-    "            eco_secu = df[df['Regions'] == str(region)].groupby(\n",
-    "                [x_bar, c_bar_secu]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_safe = 'Do you feel safe in the country?'\n",
-    "            eco_safe = df[df['Regions'] == str(region)].groupby(\n",
-    "                [x_bar, c_bar_safe]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_con = 'Do you have confidence in the ability of security agencies to contain the security situation?'\n",
-    "            eco_con = df[df['Regions'] == str(region)].groupby(\n",
-    "                [x_bar, c_bar_con]\n",
-    "            ).count()\n",
-    "            \n",
-    "            \n",
-    "            \n",
-    "        elif indicators == 'Education':\n",
-    "            \n",
-    "            x_bar = 'What is your level of education?'\n",
-    "                \n",
-    "            c_bar = 'Are you engaged in any economic activity?'\n",
-    "            eco_result = df[df['Regions'] == str(region)].groupby(\n",
-    "                [x_bar, c_bar]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_econ = 'What type of economic activity are you engaged in?'\n",
-    "            eco_type = result = df[df['Regions'] == str(region)].groupby(\n",
-    "                [x_bar, c_bar_econ]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_secu = 'Would you describe the current security situation in the country as secured?'\n",
-    "            eco_secu = df[df['Regions'] == str(region)].groupby(\n",
-    "                [x_bar, c_bar_secu]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_safe = 'Do you feel safe in the country?'\n",
-    "            eco_safe = df[df['Regions'] == str(region)].groupby(\n",
-    "                [x_bar, c_bar_safe]\n",
-    "            ).count()\n",
-    "            \n",
-    "            c_bar_con = 'Do you have confidence in the ability of security agencies to contain the security situation?'\n",
-    "            eco_con = df[df['Regions'] == str(region)].groupby(\n",
-    "                [x_bar, c_bar_con]\n",
-    "            ).count()\n",
-    "            \n",
-    "            \n",
-    "           \n",
-    "        lab = region\n",
-    "        \n",
-    "    else:\n",
-    "        pass\n",
-    "        \n",
-    "    \n",
-    "    eco_result = eco_result.reset_index()\n",
-    "    eco_result['count'] = eco_result['Regions']\n",
-    "    \n",
-    "    eco_type = eco_type.reset_index()\n",
-    "    eco_type['count'] = eco_type['Regions']\n",
-    "    \n",
-    "    eco_secu = eco_secu.reset_index()\n",
-    "    eco_secu['count'] = eco_secu['Regions']\n",
-    "    \n",
-    "    eco_safe = eco_safe.reset_index()\n",
-    "    eco_safe['count'] = eco_safe['Regions']\n",
-    "    \n",
-    "    eco_con = eco_con.reset_index()\n",
-    "    eco_con['count'] = eco_con['Regions']\n",
-    "\n",
-    "\n",
-    "    eco_chart_figure = px.bar(\n",
-    "        eco_result, x=x_bar, y=\"count\", \n",
-    "        color=c_bar)\n",
-    "    type_chart_figure = px.bar(\n",
-    "        eco_type, x=x_bar, y=\"count\", \n",
-    "        color=c_bar_econ)\n",
-    "    secu_chart_figure = px.bar(\n",
-    "        eco_secu, x=x_bar, y=\"count\", \n",
-    "        color=c_bar_secu)\n",
-    "    safe_chart_figure = px.bar(\n",
-    "        eco_safe, x=x_bar, y=\"count\", \n",
-    "        color=c_bar_safe)\n",
-    "    con_chart_figure = px.bar(\n",
-    "        eco_con, x=x_bar, y=\"count\", \n",
-    "        color=c_bar_con)\n",
-    "    \n",
-    "    return eco_chart_figure, type_chart_figure, secu_chart_figure, safe_chart_figure, con_chart_figure"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 11,
-   "id": "f78bca66",
-   "metadata": {
-    "scrolled": true
-   },
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Dash is running on http://127.0.0.1:8050/\n",
-      "\n",
-      " * Serving Flask app \"__main__\" (lazy loading)\n",
-      " * Environment: production\n",
-      "\u001b[31m   WARNING: This is a development server. Do not use it in a production deployment.\u001b[0m\n",
-      "\u001b[2m   Use a production WSGI server instead.\u001b[0m\n",
-      " * Debug mode: off\n"
+ )
+
+sidebar = html.Div(
+     [
+         html.H2('Parameters', style=TEXT_STYLE),
+         html.Hr(),
+         controls
+     ],
+style=SIDEBAR_STYLE,
+ )
+
+# #Graph Items
+content_third_row = dbc.Row(
+     [
+         html.Br(),
+         html.P('What type of economic activity are you engaged in?', style={
+             'textAlign': 'center'
+         }),
+         html.Br(),
+  
+        html.Div(
+            children=dcc.Graph(
+                id="type-chart"
+            ),
+            className="card",
+            
+        ),
      ]
-    },
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      " * Running on http://127.0.0.1:8050/ (Press CTRL+C to quit)\n",
-      "127.0.0.1 - - [23/Jan/2022 19:45:31] \"GET / HTTP/1.1\" 200 -\n",
-      "127.0.0.1 - - [23/Jan/2022 19:45:32] \"GET /_dash-layout HTTP/1.1\" 200 -\n",
-      "127.0.0.1 - - [23/Jan/2022 19:45:32] \"GET /_dash-dependencies HTTP/1.1\" 200 -\n",
-      "127.0.0.1 - - [23/Jan/2022 19:45:32] \"GET /_favicon.ico?v=2.0.0 HTTP/1.1\" 200 -\n",
-      "127.0.0.1 - - [23/Jan/2022 19:45:32] \"GET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1\" 200 -\n",
-      "127.0.0.1 - - [23/Jan/2022 19:45:32] \"GET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1\" 200 -\n",
-      "127.0.0.1 - - [23/Jan/2022 19:45:32] \"POST /_dash-update-component HTTP/1.1\" 200 -\n"
+ )
+
+content_indicator_row = dbc.Row(
+       [
+          html.Br(),
+         html.P('Are you engaged in any economic activity?', style={
+             'textAlign': 'center'
+         }),
+           html.Br(),
+           
+        html.Div(
+            children=dcc.Graph(
+                id="eco-chart"
+            ),
+            className="card",
+            
+        ),
+ 
      ]
-    },
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Exception on /_dash-update-component [POST]\n",
-      "Traceback (most recent call last):\n",
-      "  File \"/Users/edwardboamah/opt/anaconda3/lib/python3.9/site-packages/flask/app.py\", line 2447, in wsgi_app\n",
-      "    response = self.full_dispatch_request()\n",
-      "  File \"/Users/edwardboamah/opt/anaconda3/lib/python3.9/site-packages/flask/app.py\", line 1952, in full_dispatch_request\n",
-      "    rv = self.handle_user_exception(e)\n",
-      "  File \"/Users/edwardboamah/opt/anaconda3/lib/python3.9/site-packages/flask/app.py\", line 1821, in handle_user_exception\n",
-      "    reraise(exc_type, exc_value, tb)\n",
-      "  File \"/Users/edwardboamah/opt/anaconda3/lib/python3.9/site-packages/flask/_compat.py\", line 39, in reraise\n",
-      "    raise value\n",
-      "  File \"/Users/edwardboamah/opt/anaconda3/lib/python3.9/site-packages/flask/app.py\", line 1950, in full_dispatch_request\n",
-      "    rv = self.dispatch_request()\n",
-      "  File \"/Users/edwardboamah/opt/anaconda3/lib/python3.9/site-packages/flask/app.py\", line 1936, in dispatch_request\n",
-      "    return self.view_functions[rule.endpoint](**req.view_args)\n",
-      "  File \"/Users/edwardboamah/opt/anaconda3/lib/python3.9/site-packages/dash/dash.py\", line 1336, in dispatch\n",
-      "    response.set_data(func(*args, outputs_list=outputs_list))\n",
-      "  File \"/Users/edwardboamah/opt/anaconda3/lib/python3.9/site-packages/dash/_callback.py\", line 151, in add_context\n",
-      "    output_value = func(*func_args, **func_kwargs)  # %% callback invoked %%\n",
-      "  File \"/var/folders/hw/q69sf0kn4cbf7cm7vnkgykxm0000gn/T/ipykernel_66526/2633411427.py\", line 208, in submit_\n",
-      "    eco_result = eco_result.reset_index()\n",
-      "UnboundLocalError: local variable 'eco_result' referenced before assignment\n"
+ )
+
+content_secu_row = dbc.Row(
+       [
+          html.Br(),
+         html.P('Would you describe the current security situation in the country as secured?', style={
+             'textAlign': 'center'
+         }),
+           html.Br(),
+        html.Div(
+            children=dcc.Graph(
+                id="secu-chart"
+            ),
+            className="card",
+            
+        ),
+
      ]
-    },
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "127.0.0.1 - - [23/Jan/2022 19:45:32] \"POST /_dash-update-component HTTP/1.1\" 500 -\n",
-      "127.0.0.1 - - [23/Jan/2022 19:45:41] \"POST /_dash-update-component HTTP/1.1\" 200 -\n"
+ )
+
+content_con_row = dbc.Row(
+       [
+            html.Br(),
+         html.P('Do you have confidence in the ability of security agencies to contain the security situation?',
+                style={
+             'textAlign': 'center'
+         }),
+    
+        html.Div(
+            children=dcc.Graph(
+                id="con-chart"
+            ),
+            className="card",
+            
+        ),
+      
      ]
-    },
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Exception on /_dash-update-component [POST]\n",
-      "Traceback (most recent call last):\n",
-      "  File \"/Users/edwardboamah/opt/anaconda3/lib/python3.9/site-packages/flask/app.py\", line 2447, in wsgi_app\n",
-      "    response = self.full_dispatch_request()\n",
-      "  File \"/Users/edwardboamah/opt/anaconda3/lib/python3.9/site-packages/flask/app.py\", line 1952, in full_dispatch_request\n",
-      "    rv = self.handle_user_exception(e)\n",
-      "  File \"/Users/edwardboamah/opt/anaconda3/lib/python3.9/site-packages/flask/app.py\", line 1821, in handle_user_exception\n",
-      "    reraise(exc_type, exc_value, tb)\n",
-      "  File \"/Users/edwardboamah/opt/anaconda3/lib/python3.9/site-packages/flask/_compat.py\", line 39, in reraise\n",
-      "    raise value\n",
-      "  File \"/Users/edwardboamah/opt/anaconda3/lib/python3.9/site-packages/flask/app.py\", line 1950, in full_dispatch_request\n",
-      "    rv = self.dispatch_request()\n",
-      "  File \"/Users/edwardboamah/opt/anaconda3/lib/python3.9/site-packages/flask/app.py\", line 1936, in dispatch_request\n",
-      "    return self.view_functions[rule.endpoint](**req.view_args)\n",
-      "  File \"/Users/edwardboamah/opt/anaconda3/lib/python3.9/site-packages/dash/dash.py\", line 1336, in dispatch\n",
-      "    response.set_data(func(*args, outputs_list=outputs_list))\n",
-      "  File \"/Users/edwardboamah/opt/anaconda3/lib/python3.9/site-packages/dash/_callback.py\", line 151, in add_context\n",
-      "    output_value = func(*func_args, **func_kwargs)  # %% callback invoked %%\n",
-      "  File \"/var/folders/hw/q69sf0kn4cbf7cm7vnkgykxm0000gn/T/ipykernel_66526/2633411427.py\", line 208, in submit_\n",
-      "    eco_result = eco_result.reset_index()\n",
-      "UnboundLocalError: local variable 'eco_result' referenced before assignment\n"
+ )
+
+content_safe_row = dbc.Row(
+       [
+        html.Br(),
+         html.P('Do you feel safe in the country?',
+                style={
+             'textAlign': 'center'
+         }),
+           html.Br(),
+        html.Div(
+            children=dcc.Graph(
+                id="safe-chart"
+            ),
+            className="card",
+            
+        ),
+     
      ]
-    },
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "127.0.0.1 - - [23/Jan/2022 19:45:41] \"POST /_dash-update-component HTTP/1.1\" 500 -\n",
-      "127.0.0.1 - - [23/Jan/2022 19:45:46] \"POST /_dash-update-component HTTP/1.1\" 200 -\n"
-     ]
-    }
-   ],
-   "source": [
-    "if __name__ == '__main__':\n",
-    "    app.run_server(debug=True)"
-   ]
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python 3 (ipykernel)",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.9.7"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 5
-}
+ )
+
+
+content = html.Div(
+     [
+
+         content_indicator_row,
+         content_third_row,
+         content_secu_row,
+         content_con_row,
+         content_safe_row
+     ],
+     style=CONTENT_STYLE
+ )
+
+
+app.layout = html.Div([sidebar, content])
+
+@app.callback(
+    Output("district-dropdown", "options"),
+    [Input("region-dropdown", "value")],
+)
+def update_districts(region):
+    district= (df[df['Regions'] == str(region)]['District']).unique()
+    options = [{"label": nr, "value": nr} for nr in np.sort(district)]
+
+    return options
+
+
+@app.callback(
+   [Output("eco-chart", "figure"),
+    Output("type-chart", "figure"),
+    Output("secu-chart", "figure"),
+    Output("safe-chart", "figure"),
+    Output("con-chart", "figure")],
+    [Input("region-dropdown", "value"),
+    Input("district-dropdown", "value"),
+    Input("indicators-dropdown", "value")],
+)
+def submit_(region, district, indicators):   
+    if district:
+        if indicators == 'Age':
+            
+            x_bar = 'Age'
+                
+            c_bar = 'Are you engaged in any economic activity?'
+            eco_result = df[df['District'] == str(district)].groupby(
+                [x_bar, c_bar]
+            ).count()
+            
+            c_bar_econ = 'What type of economic activity are you engaged in?'
+            eco_type = result = df[df['District'] == str(district)].groupby(
+                [x_bar, c_bar_econ]
+            ).count()
+            
+            c_bar_secu = 'Would you describe the current security situation in the country as secured?'
+            eco_secu = df[df['District'] == str(district)].groupby(
+                [x_bar, c_bar_secu]
+            ).count()
+            
+            c_bar_safe = 'Do you feel safe in the country?'
+            eco_safe = df[df['District'] == str(district)].groupby(
+                [x_bar, c_bar_safe]
+            ).count()
+            
+            c_bar_con = 'Do you have confidence in the ability of security agencies to contain the security situation?'
+            eco_con = df[df['District'] == str(district)].groupby(
+                [x_bar, c_bar_con]
+            ).count()
+            
+            
+        elif indicators == 'Sex':
+            
+            x_bar = 'Sex'
+                
+            c_bar = 'Are you engaged in any economic activity?'
+            eco_result = df[df['District'] == str(district)].groupby(
+                [x_bar, c_bar]
+            ).count()
+            
+            c_bar_econ = 'What type of economic activity are you engaged in?'
+            eco_type = result = df[df['District'] == str(district)].groupby(
+                [x_bar, c_bar_econ]
+            ).count()
+            
+            c_bar_secu = 'Would you describe the current security situation in the country as secured?'
+            eco_secu = df[df['District'] == str(district)].groupby(
+                [x_bar, c_bar_secu]
+            ).count()
+            
+            c_bar_safe = 'Do you feel safe in the country?'
+            eco_safe = df[df['District'] == str(district)].groupby(
+                [x_bar, c_bar_safe]
+            ).count()
+            
+            c_bar_con = 'Do you have confidence in the ability of security agencies to contain the security situation?'
+            eco_con = df[df['District'] == str(district)].groupby(
+                [x_bar, c_bar_con]
+            ).count()
+            
+            
+            
+        elif indicators == 'Education':
+            
+            x_bar = 'What is your level of education?'
+                
+            c_bar = 'Are you engaged in any economic activity?'
+            eco_result = df[df['District'] == str(district)].groupby(
+                [x_bar, c_bar]
+            ).count()
+            
+            c_bar_econ = 'What type of economic activity are you engaged in?'
+            eco_type = result = df[df['District'] == str(district)].groupby(
+                [x_bar, c_bar_econ]
+            ).count()
+            
+            c_bar_secu = 'Would you describe the current security situation in the country as secured?'
+            eco_secu = df[df['District'] == str(district)].groupby(
+                [x_bar, c_bar_secu]
+            ).count()
+            
+            c_bar_safe = 'Do you feel safe in the country?'
+            eco_safe = df[df['District'] == str(district)].groupby(
+                [x_bar, c_bar_safe]
+            ).count()
+            
+            c_bar_con = 'Do you have confidence in the ability of security agencies to contain the security situation?'
+            eco_con = df[df['District'] == str(district)].groupby(
+                [x_bar, c_bar_con]
+            ).count()
+            
+            lab = district
+        
+    elif region:
+        
+        if indicators == 'Age':
+            
+            x_bar = 'Age'
+                
+            c_bar = 'Are you engaged in any economic activity?'
+            eco_result = df[df['Regions'] == str(region)].groupby(
+                [x_bar, c_bar]
+            ).count()
+            
+            c_bar_econ = 'What type of economic activity are you engaged in?'
+            eco_type = result = df[df['Regions'] == str(region)].groupby(
+                [x_bar, c_bar_econ]
+            ).count()
+            
+            c_bar_secu = 'Would you describe the current security situation in the country as secured?'
+            eco_secu = df[df['Regions'] == str(region)].groupby(
+                [x_bar, c_bar_secu]
+            ).count()
+            
+            c_bar_safe = 'Do you feel safe in the country?'
+            eco_safe = df[df['Regions'] == str(region)].groupby(
+                [x_bar, c_bar_safe]
+            ).count()
+            
+            c_bar_con = 'Do you have confidence in the ability of security agencies to contain the security situation?'
+            eco_con = df[df['Regions'] == str(region)].groupby(
+                [x_bar, c_bar_con]
+            ).count()
+            
+            
+        elif indicators == 'Sex':
+            
+            x_bar = 'Sex'
+                
+            c_bar = 'Are you engaged in any economic activity?'
+            eco_result = df[df['Regions'] == str(region)].groupby(
+                [x_bar, c_bar]
+            ).count()
+            
+            c_bar_econ = 'What type of economic activity are you engaged in?'
+            eco_type = result = df[df['Regions'] == str(region)].groupby(
+                [x_bar, c_bar_econ]
+            ).count()
+            
+            c_bar_secu = 'Would you describe the current security situation in the country as secured?'
+            eco_secu = df[df['Regions'] == str(region)].groupby(
+                [x_bar, c_bar_secu]
+            ).count()
+            
+            c_bar_safe = 'Do you feel safe in the country?'
+            eco_safe = df[df['Regions'] == str(region)].groupby(
+                [x_bar, c_bar_safe]
+            ).count()
+            
+            c_bar_con = 'Do you have confidence in the ability of security agencies to contain the security situation?'
+            eco_con = df[df['Regions'] == str(region)].groupby(
+                [x_bar, c_bar_con]
+            ).count()
+            
+            
+            
+        elif indicators == 'Education':
+            
+            x_bar = 'What is your level of education?'
+                
+            c_bar = 'Are you engaged in any economic activity?'
+            eco_result = df[df['Regions'] == str(region)].groupby(
+                [x_bar, c_bar]
+            ).count()
+            
+            c_bar_econ = 'What type of economic activity are you engaged in?'
+            eco_type = result = df[df['Regions'] == str(region)].groupby(
+                [x_bar, c_bar_econ]
+            ).count()
+            
+            c_bar_secu = 'Would you describe the current security situation in the country as secured?'
+            eco_secu = df[df['Regions'] == str(region)].groupby(
+                [x_bar, c_bar_secu]
+            ).count()
+            
+            c_bar_safe = 'Do you feel safe in the country?'
+            eco_safe = df[df['Regions'] == str(region)].groupby(
+                [x_bar, c_bar_safe]
+            ).count()
+            
+            c_bar_con = 'Do you have confidence in the ability of security agencies to contain the security situation?'
+            eco_con = df[df['Regions'] == str(region)].groupby(
+                [x_bar, c_bar_con]
+            ).count()
+            
+            
+           
+        lab = region
+        
+    else:
+        pass
+        
+    
+    eco_result = eco_result.reset_index()
+    eco_result['count'] = eco_result['Regions']
+    
+    eco_type = eco_type.reset_index()
+    eco_type['count'] = eco_type['Regions']
+    
+    eco_secu = eco_secu.reset_index()
+    eco_secu['count'] = eco_secu['Regions']
+    
+    eco_safe = eco_safe.reset_index()
+    eco_safe['count'] = eco_safe['Regions']
+    
+    eco_con = eco_con.reset_index()
+    eco_con['count'] = eco_con['Regions']
+
+
+    eco_chart_figure = px.bar(
+        eco_result, x=x_bar, y="count", 
+        color=c_bar)
+    type_chart_figure = px.bar(
+        eco_type, x=x_bar, y="count", 
+        color=c_bar_econ)
+    secu_chart_figure = px.bar(
+        eco_secu, x=x_bar, y="count", 
+        color=c_bar_secu)
+    safe_chart_figure = px.bar(
+        eco_safe, x=x_bar, y="count", 
+        color=c_bar_safe)
+    con_chart_figure = px.bar(
+        eco_con, x=x_bar, y="count", 
+        color=c_bar_con)
+    
+    return eco_chart_figure, type_chart_figure, secu_chart_figure, safe_chart_figure, con_chart_figure
+
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
