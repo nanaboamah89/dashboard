@@ -21,12 +21,16 @@ df = ba.append(ba).append(gr).append(ash).append(es)
 
 nregions =df.Regions.unique()
 
+labels = ['0 - 12','13 - 19','Adult']
+bins= [0, 13, 20, 100]
+df['Age_category'] = pd.cut(df['Age'], bins=bins, labels=labels, right=False)
+
 #Choose a theme and define the layout
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
 
-# the style arguments for the sidebar.
+#the style arguments for the sidebar.
 SIDEBAR_STYLE = {
      'position': 'fixed',
      'top': 0,
@@ -76,8 +80,6 @@ controls = dbc.FormGroup(
          }),
          dcc.Dropdown(
              id='district-dropdown',
-             options=[]
-             ,
 # default value
              multi=False
          ),
@@ -94,7 +96,7 @@ controls = dbc.FormGroup(
                  {"label": 'Education', "value": 'Education'}
                      ]
              ,
-# default value
+             value = "Sex",
              multi=False
          ),
      ]
@@ -109,18 +111,14 @@ sidebar = html.Div(
 style=SIDEBAR_STYLE,
  )
 
+
 # #Graph Items
 content_third_row = dbc.Row(
      [
-         html.Br(),
-         html.P('What type of economic activity are you engaged in?', style={
-             'textAlign': 'center'
-         }),
-         html.Br(),
-  
-        html.Div(
+          html.Br(),
+          html.Div(
             children=dcc.Graph(
-                id="type-chart"
+                id="type-chart",
             ),
             className="card",
             
@@ -130,15 +128,12 @@ content_third_row = dbc.Row(
 
 content_indicator_row = dbc.Row(
        [
-          html.Br(),
-         html.P('Are you engaged in any economic activity?', style={
-             'textAlign': 'center'
-         }),
+       
            html.Br(),
            
         html.Div(
             children=dcc.Graph(
-                id="eco-chart"
+                id="eco-chart",               
             ),
             className="card",
             
@@ -149,14 +144,10 @@ content_indicator_row = dbc.Row(
 
 content_secu_row = dbc.Row(
        [
-          html.Br(),
-         html.P('Would you describe the current security situation in the country as secured?', style={
-             'textAlign': 'center'
-         }),
            html.Br(),
         html.Div(
             children=dcc.Graph(
-                id="secu-chart"
+                id="secu-chart",
             ),
             className="card",
             
@@ -167,11 +158,7 @@ content_secu_row = dbc.Row(
 
 content_con_row = dbc.Row(
        [
-            html.Br(),
-         html.P('Do you have confidence in the ability of security agencies to contain the security situation?',
-                style={
-             'textAlign': 'center'
-         }),
+           
     
         html.Div(
             children=dcc.Graph(
@@ -186,11 +173,7 @@ content_con_row = dbc.Row(
 
 content_safe_row = dbc.Row(
        [
-        html.Br(),
-         html.P('Do you feel safe in the country?',
-                style={
-             'textAlign': 'center'
-         }),
+        
            html.Br(),
         html.Div(
             children=dcc.Graph(
@@ -204,9 +187,23 @@ content_safe_row = dbc.Row(
  )
 
 
-content = html.Div(
-     [
+content_title_row = dbc.Row(
+       [
+        html.Br(),
+         html.H1(
+                 id="header_title",
+                style={
+             'textAlign': 'center'
+         }),
+           html.Br(),
 
+     
+     ]
+ )
+
+content = html.Div(
+     [   
+         content_title_row,
          content_indicator_row,
          content_third_row,
          content_secu_row,
@@ -231,7 +228,8 @@ def update_districts(region):
 
 
 @app.callback(
-   [Output("eco-chart", "figure"),
+   [Output("header_title", "children"),
+    Output("eco-chart", "figure"),
     Output("type-chart", "figure"),
     Output("secu-chart", "figure"),
     Output("safe-chart", "figure"),
@@ -244,7 +242,7 @@ def submit_(region, district, indicators):
     if district:
         if indicators == 'Age':
             
-            x_bar = 'Age'
+            x_bar = 'Age_category'
                 
             c_bar = 'Are you engaged in any economic activity?'
             eco_result = df[df['District'] == str(district)].groupby(
@@ -338,7 +336,7 @@ def submit_(region, district, indicators):
         
         if indicators == 'Age':
             
-            x_bar = 'Age'
+            x_bar = 'Age_category'
                 
             c_bar = 'Are you engaged in any economic activity?'
             eco_result = df[df['Regions'] == str(region)].groupby(
@@ -429,45 +427,142 @@ def submit_(region, district, indicators):
             
            
         lab = region
+         
         
     else:
-        pass
         
+        
+        if indicators == 'Age':
+            
+            x_bar = 'Age_category'
+                
+            c_bar = 'Are you engaged in any economic activity?'
+            eco_result = df.groupby(
+                [x_bar, c_bar]
+            ).count()
+            
+            c_bar_econ = 'What type of economic activity are you engaged in?'
+            eco_type = result = df.groupby(
+                [x_bar, c_bar_econ]
+            ).count()
+            
+            c_bar_secu = 'Would you describe the current security situation in the country as secured?'
+            eco_secu = df.groupby(
+                [x_bar, c_bar_secu]
+            ).count()
+            
+            c_bar_safe = 'Do you feel safe in the country?'
+            eco_safe = df.groupby(
+                [x_bar, c_bar_safe]
+            ).count()
+            
+            c_bar_con = 'Do you have confidence in the ability of security agencies to contain the security situation?'
+            eco_con = df.groupby(
+                [x_bar, c_bar_con]
+            ).count()
+            
+            
+        elif indicators == 'Sex':
+            
+            x_bar = 'Sex'
+                
+            c_bar = 'Are you engaged in any economic activity?'
+            eco_result = df.groupby(
+                [x_bar, c_bar]
+            ).count()
+            
+            c_bar_econ = 'What type of economic activity are you engaged in?'
+            eco_type = result = df.groupby(
+                [x_bar, c_bar_econ]
+            ).count()
+            
+            c_bar_secu = 'Would you describe the current security situation in the country as secured?'
+            eco_secu = df.groupby(
+                [x_bar, c_bar_secu]
+            ).count()
+            
+            c_bar_safe = 'Do you feel safe in the country?'
+            eco_safe = df.groupby(
+                [x_bar, c_bar_safe]
+            ).count()
+            
+            c_bar_con = 'Do you have confidence in the ability of security agencies to contain the security situation?'
+            eco_con = df.groupby(
+                [x_bar, c_bar_con]
+            ).count()
+            
+            
+            
+        elif indicators == 'Education':
+            
+            x_bar = 'What is your level of education?'
+                
+            c_bar = 'Are you engaged in any economic activity?'
+            eco_result = df.groupby(
+                [x_bar, c_bar]
+            ).count()
+            
+            c_bar_econ = 'What type of economic activity are you engaged in?'
+            eco_type = result = df.groupby(
+                [x_bar, c_bar_econ]
+            ).count()
+            
+            c_bar_secu = 'Would you describe the current security situation in the country as secured?'
+            eco_secu = df.groupby(
+                [x_bar, c_bar_secu]
+            ).count()
+            
+            c_bar_safe = 'Do you feel safe in the country?'
+            eco_safe = df.groupby(
+                [x_bar, c_bar_safe]
+            ).count()
+            
+            c_bar_con = 'Do you have confidence in the ability of security agencies to contain the security situation?'
+            eco_con = df.groupby(
+                [x_bar, c_bar_con]
+            ).count()
+        
+        
+        
+        lab = 'National'
+        
+    header_title = lab
+    y_bar = 'Percentage (%)'
     
     eco_result = eco_result.reset_index()
-    eco_result['count'] = eco_result['Regions']
+    eco_result[y_bar] = eco_result[['Regions']].apply(lambda x: round((x/x.sum()) * 100, 2))
     
     eco_type = eco_type.reset_index()
-    eco_type['count'] = eco_type['Regions']
+    eco_type[y_bar] = eco_type[['Regions']].apply(lambda x: round((x/x.sum()) * 100, 2))
     
     eco_secu = eco_secu.reset_index()
-    eco_secu['count'] = eco_secu['Regions']
+    eco_secu[y_bar] = eco_secu[['Regions']].apply(lambda x: round((x/x.sum()) * 100, 2))
     
     eco_safe = eco_safe.reset_index()
-    eco_safe['count'] = eco_safe['Regions']
+    eco_safe[y_bar] = eco_safe[['Regions']].apply(lambda x: round((x/x.sum()) * 100, 2))
     
     eco_con = eco_con.reset_index()
-    eco_con['count'] = eco_con['Regions']
+    eco_con[y_bar] = eco_con[['Regions']].apply(lambda x: round((x/x.sum()) * 100, 2))
 
-
-    eco_chart_figure = px.bar(
-        eco_result, x=x_bar, y="count", 
-        color=c_bar)
-    type_chart_figure = px.bar(
-        eco_type, x=x_bar, y="count", 
-        color=c_bar_econ)
-    secu_chart_figure = px.bar(
-        eco_secu, x=x_bar, y="count", 
-        color=c_bar_secu)
-    safe_chart_figure = px.bar(
-        eco_safe, x=x_bar, y="count", 
-        color=c_bar_safe)
-    con_chart_figure = px.bar(
-        eco_con, x=x_bar, y="count", 
-        color=c_bar_con)
     
-    return eco_chart_figure, type_chart_figure, secu_chart_figure, safe_chart_figure, con_chart_figure
+    eco_chart_figure = px.bar(
+        eco_result, x=x_bar, y=y_bar, 
+        color=c_bar, hover_data={c_bar:False, x_bar:False}, title=c_bar)
+    type_chart_figure = px.bar(
+        eco_type, x=x_bar, y=y_bar,  
+        color=c_bar_econ, hover_data={c_bar_econ:False, x_bar:False}, title=c_bar_econ)
+    secu_chart_figure = px.bar(
+        eco_secu, x=x_bar, y=y_bar, 
+        color=c_bar_secu, hover_data={c_bar_secu:False, x_bar:False}, title=c_bar_secu)
+    safe_chart_figure = px.bar(
+        eco_safe, x=x_bar, y=y_bar, 
+        color=c_bar_safe, hover_data={c_bar_safe:False, x_bar:False}, title=c_bar_safe)
+    con_chart_figure = px.bar(
+        eco_con, x=x_bar, y=y_bar, 
+        color=c_bar_con, hover_data={c_bar_con:False, x_bar:False}, title=c_bar_con)
+    
+    return header_title, eco_chart_figure, type_chart_figure, secu_chart_figure, safe_chart_figure, con_chart_figure
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
